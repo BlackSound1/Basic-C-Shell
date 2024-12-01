@@ -12,19 +12,21 @@ int main() {
    std::cout << "$ ";
   
    std::string input;
-   std::getline(std::cin, input);
 
-   bool isValid = isValidCommand(input);
+   while (true) {
+	   std::getline(std::cin, input);
 
-   if (isValid) {
-	   std::cout << "" << std::endl;
-   }
-   else {
-	   std::cout << input << ": command not found" << std::endl;
+	   bool isValid = isValidCommand(input);
+
+	   if (isValid) {
+		   std::cout << "" << std::endl;
+	   }
+	   else {
+		   std::cout << input << ": command not found" << std::endl;
+	   }
    }
 
    return 0;
-
 }
 
 // Checks if a command is valid
