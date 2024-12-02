@@ -22,7 +22,7 @@ int main() {
 		std::cout << "$ ";
 
 		std::getline(std::cin, input);
-
+		
 		bool isValid = isValidCommand(input);
 
 		if (isValid) {
@@ -63,21 +63,11 @@ int runCommand(const std::string& cmd) {
 		return exitCode;
 	}
 	else if (cmdName == "echo"){
-		std::vector<std::string> whatToPrintVec{};
+		
+		const int ECHO_LENGTH = 5; // Including that space
+		std::string textToEcho = cmd.substr(ECHO_LENGTH);
 
-		for (std::vector<std::string>::iterator vecIterator = explodedCommand.begin() + 1; vecIterator != explodedCommand.end(); vecIterator++){
-			whatToPrintVec.push_back(*vecIterator);
-		}
-
-		std::ostringstream concatted{};
-		const char* const delim = " ";
-		std::copy(whatToPrintVec.begin(), whatToPrintVec.end(), std::ostream_iterator<std::string>(concatted, delim));
-
-		std::string hey = concatted.str();
-
-		auto concattedStr = trim(hey);
-
-		std::cout << concattedStr << std::endl;
+		std::cout << textToEcho << std::endl;
 
 		return -1;
 	}
