@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <sstream>
 
 const char* ws = " \t\n\r\f\v";
 
@@ -22,4 +24,25 @@ inline std::string& ltrim(std::string& s, const char* t = ws)
 inline std::string& trim(std::string& s, const char* t = ws)
 {
     return ltrim(rtrim(s, t), t);
+}
+
+// Explodes a string into a vector of strings
+std::vector<std::string> explodeString(const std::string& cmd)
+{
+	std::vector<std::string> explodedString;
+	std::stringstream ss(cmd);
+
+	std::string token;
+	while (std::getline(ss, token, ' ')) {
+		explodedString.push_back(token);
+	}
+
+	return explodedString;
+}
+
+// Checks a given vector for a given element. Returns whether the vector contains it
+bool vecContains(const std::string& str, const std::vector<std::string>& vec) {
+	auto it = std::find(vec.begin(), vec.end(), str);
+
+	return it != vec.end();
 }
