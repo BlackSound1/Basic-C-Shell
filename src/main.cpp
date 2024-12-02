@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iterator>
 
 bool isValidCommand(const std::string &cmd);
 std::vector<std::string> explodeString(const std::string &cmd);
