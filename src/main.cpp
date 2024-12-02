@@ -73,7 +73,9 @@ int runCommand(const std::string& cmd) {
 		const char* const delim = " ";
 		std::copy(whatToPrintVec.begin(), whatToPrintVec.end(), std::ostream_iterator<std::string>(concatted, delim));
 
-		auto concattedStr = trim(concatted.str());
+		std::string hey = concatted.str();
+
+		auto concattedStr = trim(hey);
 
 		std::cout << concattedStr << std::endl;
 
