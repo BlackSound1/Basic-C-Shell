@@ -4,6 +4,8 @@
 #include <vector>
 #include <iterator>
 
+#include "helpers.h"
+
 bool isValidCommand(const std::string &cmd);
 std::vector<std::string> explodeString(const std::string &cmd);
 int runCommand(const std::string& cmd);
@@ -71,7 +73,9 @@ int runCommand(const std::string& cmd) {
 		const char* const delim = " ";
 		std::copy(whatToPrintVec.begin(), whatToPrintVec.end(), std::ostream_iterator<std::string>(concatted, delim));
 
-		std::cout << concatted.str() << std::endl;
+		auto concattedStr = trim(concatted.str());
+
+		std::cout << concattedStr << std::endl;
 
 		return -1;
 	}
