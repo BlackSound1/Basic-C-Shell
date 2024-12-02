@@ -25,12 +25,13 @@ int main() {
 		if (isValid) {
 			exitCode = runCommand(input);
 
-			if (exitCode == 0)
-			{
+			if (exitCode == 0){
 				return 0;
 			}
-			else
-			{
+			else if (exitCode == -1){
+				continue;
+			}
+			else{
 				return exitCode;
 			}
 		}
@@ -47,12 +48,10 @@ int runCommand(const std::string& cmd) {
 	auto explodedCommand = explodeString(cmd);
 	std::string cmdName = explodedCommand[0];
 	
-	if (cmdName == "exit")
-	{
+	if (cmdName == "exit"){
 		// If we call exit, must have an exit code
-		if (explodedCommand.size() != 2)
-		{
-			return 1;
+		if (explodedCommand.size() != 2){
+			return -1;
 		}
 
 		// Get exit code
@@ -60,8 +59,22 @@ int runCommand(const std::string& cmd) {
 
 		return exitCode;
 	}
-	else
-	{
+	else if (cmdName == "echo"){
+		std::vector<std::string> whatToPrintVec{};
+
+		for (std::vector<std::string>::iterator vecIterator = explodedCommand.begin() + 1; vecIterator != explodedCommand.end(); vecIterator++){
+			whatToPrintVec.push_back(*vecIterator);
+		}
+
+		std::ostringstream concated{};
+		const char* const delim = " ";
+		std::copy(whatToPrintVec.begin(), whatToPrintVec.end(), std::ostream_iterator<std::string>(concated, delim));
+
+		std::cout << concated.str() << std::endl;
+
+		return -1;
+	}
+	else{
 		return 0;
 	}
 }
@@ -76,6 +89,10 @@ bool isValidCommand(const std::string &cmd) {
 	std::string cmdName = explodedCommand[0];
 
 	if (cmdName == "exit") {
+		return true;
+	}
+	else if (cmdName == "echo")
+	{
 		return true;
 	}
 	else {
