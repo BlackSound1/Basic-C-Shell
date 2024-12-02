@@ -66,11 +66,11 @@ int runCommand(const std::string& cmd) {
 			whatToPrintVec.push_back(*vecIterator);
 		}
 
-		std::ostringstream concated{};
+		std::ostringstream concatted{};
 		const char* const delim = " ";
-		std::copy(whatToPrintVec.begin(), whatToPrintVec.end(), std::ostream_iterator<std::string>(concated, delim));
+		std::copy(whatToPrintVec.begin(), whatToPrintVec.end(), std::ostream_iterator<std::string>(concatted, delim));
 
-		std::cout << concated.str() << std::endl;
+		std::cout << concatted.str() << std::endl;
 
 		return -1;
 	}
