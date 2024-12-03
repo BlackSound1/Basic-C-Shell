@@ -6,7 +6,7 @@
 
 #include "helpers.h"
 
-std::vector<std::string> builtins{"exit", "echo", "type"};
+const std::vector<std::string> builtins{"exit", "echo", "type"};
 
 int runCommand(const std::string &cmd);
 
@@ -72,7 +72,7 @@ int runCommand(const std::string &cmd) {
 		}
 
 		// Get the argument
-		auto arg = explodedCommand[1];
+		auto const &arg = explodedCommand[1];
 
 		if (vecContains(arg, builtins)) {
 			std::cout << arg << " is a shell builtin" << std::endl;
