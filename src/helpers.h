@@ -133,6 +133,18 @@ std::string getPath(const std::string& cmd) {
         if (std::filesystem::exists(absolutePath)) {
             return absolutePath;
         }
+
+        // Try the above, but for Windows...
+
+        absolutePath = path + OS_PATH_SLASH + cmd + ".exe";
+
+        if (std::filesystem::exists(absolutePath)) {
+            return absolutePath;
+        }
     }
     return "";
+}
+
+int invokeCommand(const std::string& cmd) {
+    return std::system(cmd.c_str());
 }

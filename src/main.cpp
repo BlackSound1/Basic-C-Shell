@@ -96,6 +96,24 @@ int runCommand(const std::string &cmd) {
 		return -1;
 	}
 	else {
+		
+		// Try to get the absolute path of the command
+		const auto& pathToCmd{ getPath(cmdName) };
+
+		// If we found nothing, return early
+		if (pathToCmd.empty()) {
+			return -2;
+		}
+
+		// Try to run the command. If we get some positive, non-zero status, return it
+		if (const auto status{ invokeCommand(cmd) }; status > 0) {
+			return status;
+		}
+		else {
+			return -1;
+		}
+
+		// Else, just return -2 so we can say the command wasn't found
 		return -2;
 	}
 }
