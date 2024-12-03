@@ -72,15 +72,27 @@ int runCommand(const std::string &cmd) {
 		}
 
 		// Get the argument
-		auto const &arg = explodedCommand[1];
+		auto const& arg{ explodedCommand[1] };
 
+		// If it's a builtin, return
 		if (vecContains(arg, builtins)) {
 			std::cout << arg << " is a shell builtin" << std::endl;
-		}
-		else {
-			std::cout << arg << ": not found" << std::endl;
+			return -1;
 		}
 
+		// Try to get the path for the given command, if any
+		const auto& path{ getPath(arg) };
+		
+		// If we found the program, return
+		if (!path.empty()) {
+			std::cout << arg << " is " << path << std::endl;
+
+			return -1;
+		}
+
+		// If we didn't find it, return
+		std::cout << arg << ": not found" << std::endl;
+		
 		return -1;
 	}
 	else {
