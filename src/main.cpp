@@ -6,7 +6,7 @@
 
 #include "helpers.h"
 
-const std::vector<std::string> builtins{"exit", "echo", "type"};
+const std::vector<std::string> builtins{"exit", "echo", "type", "pwd"};
 
 int runCommand(const std::string &cmd);
 
@@ -93,6 +93,11 @@ int runCommand(const std::string &cmd) {
 		// If we didn't find it, return
 		std::cout << arg << ": not found" << std::endl;
 		
+		return -1;
+	}
+	else if (cmdName == "pwd") {
+		std::cout << getCWD() << std::endl;
+
 		return -1;
 	}
 	else {

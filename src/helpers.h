@@ -148,3 +148,8 @@ std::string getPath(const std::string& cmd) {
 int invokeCommand(const std::string& cmd) {
     return std::system(cmd.c_str());
 }
+
+// Get the current working directory
+std::string getCWD() {
+    return std::filesystem::current_path().string();
+}
