@@ -77,10 +77,9 @@ std::string getOsName()
 
 // Windows and Unix use different PATH delimiters. Return `;` for Windows and `:` for Unix
 char getPATHDelim() {
-    const auto OS_NAME{ getOsName() };
-
+    
     // Check if OS is Windows
-    if (OS_NAME.find("Windows") != std::string::npos)
+    if (const auto OS_NAME{ getOsName() }; OS_NAME.find("Windows") != std::string::npos)
     {
         return ';';
     }
@@ -91,6 +90,17 @@ char getPATHDelim() {
 // Windows and Unix use different folder separators. Return `\` for Windows and `/` for Unix
 char getOSSlash() {
     return static_cast<char>(std::filesystem::path::preferred_separator);
+}
+
+// Get the user profile depending on whether we're in Windows or Linux
+std::filesystem::path getUserHomeDir() {
+    // Check if OS is Windows
+    if (const auto OS_NAME{ getOsName() }; OS_NAME.find("Windows") != std::string::npos)
+    {
+        return std::filesystem::path{ getenv("USERPROFILE") };
+    }
+
+    return std::filesystem::path{ getenv("HOME") };
 }
 
 // Get the path associated with a given command, if any. Returns empty string if not

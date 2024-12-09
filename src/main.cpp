@@ -109,6 +109,19 @@ int runCommand(const std::string &cmd) {
 
 		// Get the directory to return to
 		const std::filesystem::path& pathString{ explodedCommand[1] };
+		
+		// Handle home directory
+		if (pathString.string() == "~") {
+			const auto& HOME_DIR{ getUserHomeDir() };
+
+			// Convert it to path
+			const auto& path{ std::filesystem::path(HOME_DIR) };
+
+			// Set the cwd to the given absolute path
+			std::filesystem::current_path(path);
+
+			return -1;
+		}
 
 		// Convert it to a path
 		const auto& path{ std::filesystem::path(pathString) };
@@ -119,7 +132,7 @@ int runCommand(const std::string &cmd) {
 			return -1;
 		}
 
-		// Try to set the cwd to the given absolute path
+		// Set the cwd to the given absolute path
 		std::filesystem::current_path(path);
 
 		return -1;
