@@ -90,13 +90,7 @@ char getPATHDelim() {
 
 // Windows and Unix use different folder separators. Return `\` for Windows and `/` for Unix
 char getOSSlash() {
-    const auto OS_NAME{ getOsName() };
-
-    if (OS_NAME.find("Windows") != std::string::npos){
-        return '\\';
-    }
-
-    return '/';
+    return static_cast<char>(std::filesystem::path::preferred_separator);
 }
 
 // Get the path associated with a given command, if any. Returns empty string if not

@@ -6,7 +6,7 @@
 
 #include "helpers.h"
 
-const std::vector<std::string> builtins{"exit", "echo", "type", "pwd"};
+const std::vector<std::string> builtins{"exit", "echo", "type", "pwd", "cd"};
 
 int runCommand(const std::string &cmd);
 
@@ -97,6 +97,30 @@ int runCommand(const std::string &cmd) {
 	}
 	else if (cmdName == "pwd") {
 		std::cout << getCWD() << std::endl;
+
+		return -1;
+	}
+	else if (cmdName == "cd") {
+
+		// For now, if cd is run by itself, just do nothing
+		if (explodedCommand.size() == 1) {
+			return -1;
+		}
+
+		// Get the directory to return to
+		const std::filesystem::path& pathString{ explodedCommand[1] };
+
+		// Convert it to a path
+		const auto& path{ std::filesystem::path(pathString) };
+
+		// Check if path exists
+		if (!std::filesystem::exists(path)) {
+			std::cerr << "Path " << path << " does not exist" << std::endl;
+			return -1;
+		}
+
+		// Try to set the cwd to the given absolute path
+		std::filesystem::current_path(path);
 
 		return -1;
 	}
