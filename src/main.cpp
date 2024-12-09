@@ -115,7 +115,7 @@ int runCommand(const std::string &cmd) {
 
 		// Check if path exists
 		if (!std::filesystem::exists(path)) {
-			std::cerr << "Path " << path << " does not exist" << std::endl;
+			std::cerr << "cd: " << path.string() << ": No such file or directory" << std::endl;
 			return -1;
 		}
 
