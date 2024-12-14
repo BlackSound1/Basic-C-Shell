@@ -33,9 +33,14 @@ int handleExitCommand(std::vector<std::string> args) {
 
 // Handles the echo builtin command
 void handleEchoCommand(std::vector<std::string> args) {
-	for (auto& s : args) {
-		std::cout << s << " ";
+	for (size_t i = 0; i < args.size(); i++)
+	{
+		if (i == args.size() - 1)
+			std::cout << args.at(i);
+		else
+			std::cout << args.at(i) << " ";
 	}
+
 	std::cout << std::endl;
 }
 
