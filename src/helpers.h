@@ -86,7 +86,9 @@ std::vector<std::string> populateArguments(const std::string& cmd)
         }
     }
 
-    explodedString.push_back(normalBuffer);
+    // Prevent empty buffer from being written
+    if (!normalBuffer.empty())
+        explodedString.push_back(normalBuffer);
 
     return explodedString;
 }

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+
 #include "helpers.h"
 
 
@@ -29,7 +30,7 @@ Command parseCommand(std::string_view input) {
 		cmdName = input.substr(0, idx);
 
 		// Get the substring of everything after the first word
-		cmdArgs = populateArguments(static_cast<std::string>(input.substr(idx)));
+		cmdArgs = populateArguments(static_cast<std::string>(input.substr(idx + 1)));
 	}
 
 	return { cmdName, std::vector<std::string> {cmdArgs} };
