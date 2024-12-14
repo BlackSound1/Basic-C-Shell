@@ -4,6 +4,7 @@
 #include <vector>
 #include <sstream>
 #include <filesystem>
+#include <algorithm>
 
 const char* ws = " \t\n\r\f\v";
 
@@ -25,6 +26,69 @@ inline std::string& ltrim(std::string& s, const char* t = ws)
 inline std::string& trim(std::string& s, const char* t = ws)
 {
     return ltrim(rtrim(s, t), t);
+}
+
+// Populates the arguments for the command
+std::vector<std::string> populateArguments(const std::string& cmd)
+{
+    std::vector<std::string> explodedString{};
+
+    std::string normalBuffer{};
+    std::string quoteBuffer{};
+
+    bool singleQuoting{ false };
+
+    for (const auto& character : cmd) {
+        
+        // If we run into a '
+        if (character == '\'')
+        {
+            // Toggle single quoting mode
+            singleQuoting = !singleQuoting;
+
+            // If we're no longer single quoting, add the quote buffer to the vector
+            if (!singleQuoting)
+            {
+                explodedString.push_back(quoteBuffer);
+                quoteBuffer.clear();
+            }
+
+            // Move on to next char
+            continue;
+        }
+
+        if (character == ' ')
+        {
+            // If we're single quoting, add the space to the quote buffer
+            if (singleQuoting)
+            {
+                quoteBuffer.push_back(character);
+                continue;
+            }
+
+            // If we're not single quoting, dump the normal buffer,
+            // assuming the normal buffer is not empty
+            if (!normalBuffer.empty())
+            {
+                explodedString.push_back(normalBuffer);
+                normalBuffer.clear();
+            }
+        }
+        else
+        {
+            // If we're single quoting, add to the quote buffer
+            if (singleQuoting)
+                quoteBuffer.push_back(character);
+
+            // If we're not single quoting, add to the normal buffer
+            else
+                normalBuffer.push_back(character);
+        }
+    }
+
+    explodedString.push_back(normalBuffer);
+
+    return explodedString;
 }
 
 // Explodes a string into a vector of strings
@@ -131,11 +195,11 @@ std::string getPath(const std::string& cmd) {
         std::getline(ss, path, OS_PATH_DELIM);
 
         // Attach the given command to the end of the current path
-        std::string absolutePath{ path + OS_PATH_SLASH + cmd };
+        std::filesystem::path absolutePath{ path + OS_PATH_SLASH + cmd };
 
         // Check to see if the path exists
         if (std::filesystem::exists(absolutePath)) {
-            return absolutePath;
+            return absolutePath.string();
         }
 
         // Try the above, but for Windows...
@@ -143,14 +207,15 @@ std::string getPath(const std::string& cmd) {
         absolutePath = path + OS_PATH_SLASH + cmd + ".exe";
 
         if (std::filesystem::exists(absolutePath)) {
-            return absolutePath;
+            return absolutePath.string();
         }
     }
     return "";
 }
 
-int invokeCommand(const std::string& cmd) {
-    return std::system(cmd.c_str());
+// Runs a given command
+void invokeCommand(const std::string& cmd) {
+    std::system(cmd.c_str());
 }
 
 // Get the current working directory

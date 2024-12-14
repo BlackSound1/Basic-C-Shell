@@ -5,157 +5,52 @@
 #include <algorithm>
 
 #include "helpers.h"
+#include "Builtins.h"
+#include "Command.h"
 
-const std::vector<std::string> builtins{"exit", "echo", "type", "pwd", "cd"};
-
-int runCommand(const std::string &cmd);
 
 int main() {
+
 	// Flush after every std::cout / std:cerr
 	std::cout << std::unitbuf;
 	std::cerr << std::unitbuf;
 
-	int exitCode = 0;
-	std::string input;
+	int exitCode{ 0 };
+	std::string input{};
 
 	while (true) {
 		std::cout << "$ ";
 
 		std::getline(std::cin, input);
 
-		exitCode = runCommand(input);
+		const Command cmd{ parseCommand(input) };
 
-		if (exitCode == -1) {
-			continue;
+		const auto& cmdName{ cmd.Name };
+		const auto& cmdArgs{ cmd.Arguments };
+
+		if (cmdName == "exit")
+		{
+			return handleExitCommand(cmdArgs);
 		}
-		else if (exitCode == -2) {
-			std::cout << input << ": command not found" << std::endl;
+		else if (cmdName == "echo")
+		{
+			handleEchoCommand(cmdArgs);
+		}
+		else if (cmdName == "type")
+		{
+			handleTypeCommand(cmdArgs);
+		}
+		else if (cmdName == "pwd")
+		{
+			std::cout << getCWD() << std::endl;
+		}
+		else if (cmdName == "cd") {
+			handleCdCommand(cmdArgs);
 		}
 		else {
-			return exitCode;
+			handleUnknownCommand(cmdName, input);
 		}
 	}
 
    return exitCode;
-}
-
-int runCommand(const std::string &cmd) {
-	// Get the exploded command
-	auto explodedCommand = explodeString(cmd);
-	std::string cmdName = explodedCommand[0];
-	
-	if (cmdName == "exit") {
-		// If we call exit, must have an exit code
-		if (explodedCommand.size() != 2){
-			return -1;
-		}
-
-		// Get exit code
-		int exitCode = std::atoi(explodedCommand[1].c_str());
-
-		return exitCode;
-	}
-	else if (cmdName == "echo") {
-		
-		const int ECHO_LENGTH = 5; // Including the space
-		std::string textToEcho = cmd.substr(ECHO_LENGTH);
-
-		std::cout << textToEcho << std::endl;
-
-		return -1;
-	}
-	else if (cmdName == "type") {
-		// Make sure this command has exactly 1 argument
-		if (explodedCommand.size() != 2) {
-			std::cout << "type command needs exactly one argument" << std::endl;
-			return -1;
-		}
-
-		// Get the argument
-		auto const& arg{ explodedCommand[1] };
-
-		// If it's a builtin, return
-		if (vecContains(arg, builtins)) {
-			std::cout << arg << " is a shell builtin" << std::endl;
-			return -1;
-		}
-
-		// Try to get the path for the given command, if any
-		const auto& path{ getPath(arg) };
-		
-		// If we found the program, return
-		if (!path.empty()) {
-			std::cout << arg << " is " << path << std::endl;
-
-			return -1;
-		}
-
-		// If we didn't find it, return
-		std::cout << arg << ": not found" << std::endl;
-		
-		return -1;
-	}
-	else if (cmdName == "pwd") {
-		std::cout << getCWD() << std::endl;
-
-		return -1;
-	}
-	else if (cmdName == "cd") {
-
-		// For now, if cd is run by itself, just do nothing
-		if (explodedCommand.size() == 1) {
-			return -1;
-		}
-
-		// Get the directory to return to
-		const std::filesystem::path& pathString{ explodedCommand[1] };
-		
-		// Handle home directory
-		if (pathString.string() == "~") {
-			const auto& HOME_DIR{ getUserHomeDir() };
-
-			// Convert it to path
-			const auto& path{ std::filesystem::path(HOME_DIR) };
-
-			// Set the cwd to the given absolute path
-			std::filesystem::current_path(path);
-
-			return -1;
-		}
-
-		// Convert it to a path
-		const auto& path{ std::filesystem::path(pathString) };
-
-		// Check if path exists
-		if (!std::filesystem::exists(path)) {
-			std::cerr << "cd: " << path.string() << ": No such file or directory" << std::endl;
-			return -1;
-		}
-
-		// Set the cwd to the given absolute path
-		std::filesystem::current_path(path);
-
-		return -1;
-	}
-	else {
-		
-		// Try to get the absolute path of the command
-		const auto& pathToCmd{ getPath(cmdName) };
-
-		// If we found nothing, return early
-		if (pathToCmd.empty()) {
-			return -2;
-		}
-
-		// Try to run the command. If we get some positive, non-zero status, return it
-		if (const auto status{ invokeCommand(cmd) }; status > 0) {
-			return status;
-		}
-		else {
-			return -1;
-		}
-
-		// Else, just return -2 so we can say the command wasn't found
-		return -2;
-	}
 }
