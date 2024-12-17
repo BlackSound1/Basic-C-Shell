@@ -37,7 +37,7 @@ std::vector<std::string> populateArguments(std::string_view cmd)
             // If we're currently escaping, treat this as a normal char
             if (escaping)
             {
-                normalBuffer.push_back(character);
+                singleQuoteBuffer.push_back(character);
                 escaping = false;
                 continue;
             }
@@ -70,7 +70,7 @@ std::vector<std::string> populateArguments(std::string_view cmd)
             // If we're currently escaping, treat this as a normal char
             if (escaping)
             {
-                normalBuffer.push_back(character);
+                doubleQuoteBuffer.push_back(character);
                 escaping = false;
                 continue;
             }
