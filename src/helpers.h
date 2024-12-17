@@ -136,7 +136,7 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a \, toggle escaping mode
         if (character == '\\')
         {
-            if (singleQuoting) continue;
+            //if (singleQuoting) continue;
             escaping = !escaping;
             continue;
         }
