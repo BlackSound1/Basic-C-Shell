@@ -25,6 +25,7 @@ std::vector<std::string> populateArguments(std::string_view cmd)
 
     bool singleQuoting{ false };
     bool doubleQuoting{ false };
+    bool escaping{ false };
 
     for (size_t i{ 0 }; i < cmd.size(); i++) {
 
@@ -33,6 +34,14 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we run into a ' while not double-quoting
         if (character == '\'' && !doubleQuoting)
         {
+            // If we're currently escaping, treat this as a normal char
+            if (escaping)
+            {
+                normalBuffer.push_back(character);
+                escaping = false;
+                continue;
+            }
+
             // Toggle single quoting mode
             singleQuoting = !singleQuoting;
 
@@ -58,6 +67,14 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a ", toggle double quoting
         if (character == '"')
         {
+            // If we're currently escaping, treat this as a normal char
+            if (escaping)
+            {
+                normalBuffer.push_back(character);
+                escaping = false;
+                continue;
+            }
+
             // Toggle double quoting mode
             doubleQuoting = !doubleQuoting;
 
@@ -73,6 +90,14 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a space
         if (character == ' ')
         {
+            // If we're currently escaping, treat this as a normal char
+            if (escaping)
+            {
+                normalBuffer.push_back(character);
+                escaping = false;
+                continue;
+            }
+
             // If we're single quoting, add the space to the quote buffer
             if (singleQuoting) singleQuoteBuffer.push_back(character);
 
@@ -86,38 +111,37 @@ std::vector<std::string> populateArguments(std::string_view cmd)
                 explodedString.push_back(normalBuffer);
                 normalBuffer.clear();
             }
+
+            continue;
         }
 
-        // If we see any other character
-        else
+        // If we see any other character...
+
+        // If we're single-quoting, add to the single quote buffer
+        if (singleQuoting) 
         {
-            // If we're single-quoting, add to the single quote buffer
-            if (singleQuoting) 
-            {
-                singleQuoteBuffer.push_back(character);
-                continue;
-            }
-            
-            // If we're double-quoting, add to the double quote buffer
-            if (doubleQuoting)
-            {
-                doubleQuoteBuffer.push_back(character);
-                continue;
-            }
-
-            // If we're not single-quoting or double-quoting...
-
-            // If we see a \, skip it
-            if (character == '\\')
-            {
-                if (i < cmd.size()) i += 2;
-
-                continue;
-            }
-
-            // Add to the normal buffer, if all else fails
-            normalBuffer.push_back(character);
+            singleQuoteBuffer.push_back(character);
+            continue;
         }
+            
+        // If we're double-quoting, add to the double quote buffer
+        if (doubleQuoting)
+        {
+            doubleQuoteBuffer.push_back(character);
+            continue;
+        }
+
+        // If we're not single-quoting or double-quoting...
+
+        // If we see a \, toggle escaping mode
+        if (character == '\\')
+        {
+            escaping = !escaping;
+            continue;
+        }
+
+        // Add to the normal buffer, if all else fails
+        normalBuffer.push_back(character);
     }
 
     // Prevent empty buffer from being written
