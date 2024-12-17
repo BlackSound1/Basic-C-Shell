@@ -73,15 +73,14 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         if (character == ' ')
         {
             // If we're single quoting, add the space to the quote buffer
-            if (singleQuoting)
-            {
-                singleQuoteBuffer.push_back(character);
-                continue;
-            }
+            if (singleQuoting) singleQuoteBuffer.push_back(character);
 
-            // If we're not single quoting, dump the normal buffer,
+			// If we're double quoting, add the space to the double quote buffer
+			else if (doubleQuoting) doubleQuoteBuffer.push_back(character);
+
+            // If we're not quoting, dump the normal buffer,
             // assuming the normal buffer is not empty
-            if (!normalBuffer.empty())
+            else if (!normalBuffer.empty())
             {
                 explodedString.push_back(normalBuffer);
                 normalBuffer.clear();
