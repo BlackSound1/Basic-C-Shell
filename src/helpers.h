@@ -118,7 +118,7 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see any other character...
 
         // If we're single-quoting, add to the single quote buffer
-        if (singleQuoting) 
+        if (singleQuoting)
         {
             singleQuoteBuffer.push_back(character);
             continue;
@@ -136,6 +136,7 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a \, toggle escaping mode
         if (character == '\\')
         {
+            if (singleQuoting) continue;
             escaping = !escaping;
             continue;
         }
