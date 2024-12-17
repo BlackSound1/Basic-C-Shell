@@ -9,7 +9,7 @@
 
 // Check if next character is a special character
 bool nextIsSpecialChar(std::string_view cmd, size_t idx) {
-    std::set<char> specialChars{ '$', '`', '\\', '\n'};
+    std::set<char> specialChars{ '$', '`', '\\', '\n', '"'};
 
     return specialChars.find(cmd.at(idx + 1)) != specialChars.end();
 }
@@ -30,17 +30,23 @@ std::vector<std::string> populateArguments(std::string_view cmd)
     for (size_t i{ 0 }; i < cmd.size(); i++) {
 
         const auto& character{ cmd.at(i) };
- 
+
+        if (escaping) {
+            doubleQuoteBuffer.push_back(character);
+            escaping = false;
+            continue;
+        }
+
         // If we run into a ' while not double-quoting
         if (character == '\'' && !doubleQuoting)
         {
-            // If we're currently escaping, treat this as a normal char
-            if (escaping)
-            {
-                singleQuoteBuffer.push_back(character);
-                escaping = false;
-                continue;
-            }
+            //// If we're currently escaping, treat this as a normal char
+            //if (escaping)
+            //{
+            //    singleQuoteBuffer.push_back(character);
+            //    escaping = false;
+            //    continue;
+            //}
 
             // Toggle single quoting mode
             singleQuoting = !singleQuoting;
@@ -56,15 +62,22 @@ std::vector<std::string> populateArguments(std::string_view cmd)
             continue;
         }
 
-        // If we run into a ' while double-quoting, treat it like a normal char and 
+        // If we run into a ' while double-quoting, treat it like a normal char and
 		// add it to the double-quote buffer
-        else if (character == '\'' && doubleQuoting)
+        if (character == '\'' && doubleQuoting)
         {
             doubleQuoteBuffer.push_back(character);
 			continue;
         }
 
-        // If we see a ", toggle double quoting
+        // If we see a \ while double-quoting, escape if next char is in [\, $, ", \n]
+        if (character == '\\' && doubleQuoting && nextIsSpecialChar(cmd, i))
+        {
+            escaping = true;
+            continue;
+        }
+
+        // If we see a "...
         if (character == '"')
         {
             // If we're currently single-quoting, treat this as a normal char
@@ -74,17 +87,10 @@ std::vector<std::string> populateArguments(std::string_view cmd)
 				continue;
             }
 
-            //// If we're currently escaping, treat this as a normal char
-            //if (escaping)
-            //{
-            //    doubleQuoteBuffer.push_back(character);
-            //    escaping = false;
-            //    continue;
-            //}
-
-            // Toggle double quoting mode
+            // Otherwise, toggle double-quoting mode
             doubleQuoting = !doubleQuoting;
 
+            // If we're no longer double-quoting, add the buffer to the vector
             if (!doubleQuoting)
             {
                 explodedString.push_back(doubleQuoteBuffer);
@@ -97,13 +103,13 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a space
         if (character == ' ')
         {
-            // If we're currently escaping, treat this as a normal char
-            if (escaping)
-            {
-                normalBuffer.push_back(character);
-                escaping = false;
-                continue;
-            }
+            //// If we're currently escaping, treat this as a normal char
+            //if (escaping)
+            //{
+            //    normalBuffer.push_back(character);
+            //    escaping = false;
+            //    continue;
+            //}
 
             // If we're single quoting, add the space to the quote buffer
             if (singleQuoting) singleQuoteBuffer.push_back(character);
@@ -124,27 +130,24 @@ std::vector<std::string> populateArguments(std::string_view cmd)
 
         // If we see any other character...
 
+        //// If we see a \ while double-quoting, toggle escaping mode
+        //if (character == '\\' && doubleQuoting)
+        //{
+        //    escaping = true;
+        //    continue;
+        //}
+
         // If we're single-quoting, add to the single quote buffer
         if (singleQuoting)
         {
             singleQuoteBuffer.push_back(character);
             continue;
         }
-            
+ 
         // If we're double-quoting, add to the double quote buffer
         if (doubleQuoting)
         {
             doubleQuoteBuffer.push_back(character);
-            continue;
-        }
-
-        // If we're not single-quoting or double-quoting...
-
-        // If we see a \, toggle escaping mode
-        if (character == '\\')
-        {
-            if (singleQuoting) continue;
-            escaping = !escaping;
             continue;
         }
 
