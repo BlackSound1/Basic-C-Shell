@@ -1,47 +1,36 @@
 #pragma once
 
+#include <filesystem>
+#include <set>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <filesystem>
-#include <algorithm>
 
-const char* ws = " \t\n\r\f\v";
 
-// trim from end of string (right)
-inline std::string& rtrim(std::string& s, const char* t = ws)
-{
-    s.erase(s.find_last_not_of(t) + 1);
-    return s;
-}
+// Check if next character is a special character
+bool nextIsSpecialChar(std::string_view cmd, size_t idx) {
+    std::set<char> specialChars{ '$', '`', '\\', '\n'};
 
-// trim from beginning of string (left)
-inline std::string& ltrim(std::string& s, const char* t = ws)
-{
-    s.erase(0, s.find_first_not_of(t));
-    return s;
-}
-
-// trim from both ends of string (right then left)
-inline std::string& trim(std::string& s, const char* t = ws)
-{
-    return ltrim(rtrim(s, t), t);
+    return specialChars.find(cmd.at(idx + 1)) != specialChars.end();
 }
 
 // Populates the arguments for the command
-std::vector<std::string> populateArguments(const std::string& cmd)
+std::vector<std::string> populateArguments(std::string_view cmd)
 {
     std::vector<std::string> explodedString{};
 
     std::string normalBuffer{};
-    std::string quoteBuffer{};
+    std::string singleQuoteBuffer{};
+    std::string doubleQuoteBuffer{};
 
     bool singleQuoting{ false };
+    bool doubleQuoting{ false };
 
-    for (const auto& character : cmd) {
-        
-        // If we run into a '
-        if (character == '\'')
+    for (size_t i{ 0 }; i < cmd.size(); i++) {
+
+        const auto& character{ cmd.at(i) };
+ 
+        // If we run into a ' while not double-quoting
+        if (character == '\'' && !doubleQuoting)
         {
             // Toggle single quoting mode
             singleQuoting = !singleQuoting;
@@ -49,20 +38,44 @@ std::vector<std::string> populateArguments(const std::string& cmd)
             // If we're no longer single quoting, add the quote buffer to the vector
             if (!singleQuoting)
             {
-                explodedString.push_back(quoteBuffer);
-                quoteBuffer.clear();
+                explodedString.push_back(singleQuoteBuffer);
+                singleQuoteBuffer.clear();
             }
 
             // Move on to next char
             continue;
         }
 
+        // If we run into a ' while double-quoting, treat it like a normal char and 
+		// add it to the normal buffer
+        else if (character == '\'' && doubleQuoting)
+        {
+            normalBuffer.push_back(character);
+			continue;
+        }
+
+        // If we see a ", toggle double quoting
+        if (character == '"')
+        {
+            // Toggle double quoting mode
+            doubleQuoting = !doubleQuoting;
+
+            if (!doubleQuoting)
+            {
+                explodedString.push_back(doubleQuoteBuffer);
+                doubleQuoteBuffer.clear();
+            }
+
+            continue;
+        }
+
+        // If we see a space
         if (character == ' ')
         {
             // If we're single quoting, add the space to the quote buffer
             if (singleQuoting)
             {
-                quoteBuffer.push_back(character);
+                singleQuoteBuffer.push_back(character);
                 continue;
             }
 
@@ -74,15 +87,18 @@ std::vector<std::string> populateArguments(const std::string& cmd)
                 normalBuffer.clear();
             }
         }
+
+        // If we see any other character
         else
         {
-            // If we're single quoting, add to the quote buffer
-            if (singleQuoting)
-                quoteBuffer.push_back(character);
+            // If we're single-quoting, add to the quote buffer
+            if (singleQuoting) singleQuoteBuffer.push_back(character);
+            
+            // If we're double-quoting
+            else if (doubleQuoting) doubleQuoteBuffer.push_back(character);
 
-            // If we're not single quoting, add to the normal buffer
-            else
-                normalBuffer.push_back(character);
+            // If we're not single-quoting or double-quoting, add to the normal buffer
+            else normalBuffer.push_back(character);
         }
     }
 
@@ -91,34 +107,6 @@ std::vector<std::string> populateArguments(const std::string& cmd)
         explodedString.push_back(normalBuffer);
 
     return explodedString;
-}
-
-// Explodes a string into a vector of strings
-std::vector<std::string> explodeString(const std::string& cmd, const char& delim=' ')
-{
-    std::vector<std::string> explodedString{};
-	std::stringstream ss(cmd);
-
-	std::string token;
-
-    // Loop through each line of the string, separated by delim
-	while (std::getline(ss, token, delim)) {
-
-        // Add to the vector if it's not a blank string
-        if (token != "")
-        {
-		    explodedString.push_back(token);
-        }
-	}
-
-	return explodedString;
-}
-
-// Checks a given vector for a given element. Returns whether the vector contains it
-bool vecContains(const std::string& str, const std::vector<std::string>& vec) {
-	auto it = std::find(vec.begin(), vec.end(), str);
-
-	return it != vec.end();
 }
 
 // Get the name of the current OS by using preprocessor directives
@@ -143,14 +131,7 @@ std::string getOsName()
 
 // Windows and Unix use different PATH delimiters. Return `;` for Windows and `:` for Unix
 char getPATHDelim() {
-    
-    // Check if OS is Windows
-    if (const auto OS_NAME{ getOsName() }; OS_NAME.find("Windows") != std::string::npos)
-    {
-        return ';';
-    }
-    
-    return ':';
+    return getOsName().find("Windows") != std::string::npos ? ';' : ':';
 }
 
 // Windows and Unix use different folder separators. Return `\` for Windows and `/` for Unix
@@ -161,7 +142,7 @@ char getOSSlash() {
 // Get the user profile depending on whether we're in Windows or Linux
 std::filesystem::path getUserHomeDir() {
     // Check if OS is Windows
-    if (const auto OS_NAME{ getOsName() }; OS_NAME.find("Windows") != std::string::npos)
+    if (getOsName().find("Windows") != std::string::npos)
     {
         return std::filesystem::path{ getenv("USERPROFILE") };
     }
@@ -171,7 +152,7 @@ std::filesystem::path getUserHomeDir() {
 
 // Get the path associated with a given command, if any. Returns empty string if not
 std::string getPath(const std::string& cmd) {
-    
+ 
     // Read the PATH
     const auto PATH{ getenv("PATH") };
 
