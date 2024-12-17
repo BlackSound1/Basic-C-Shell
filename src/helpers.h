@@ -67,13 +67,20 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a ", toggle double quoting
         if (character == '"')
         {
-            // If we're currently escaping, treat this as a normal char
-            if (escaping)
+            // If we're currently single-quoting, treat this as a normal char
+            if (singleQuoting)
             {
-                doubleQuoteBuffer.push_back(character);
-                escaping = false;
-                continue;
+                singleQuoteBuffer.push_back(character);
+				continue;
             }
+
+            //// If we're currently escaping, treat this as a normal char
+            //if (escaping)
+            //{
+            //    doubleQuoteBuffer.push_back(character);
+            //    escaping = false;
+            //    continue;
+            //}
 
             // Toggle double quoting mode
             doubleQuoting = !doubleQuoting;
@@ -136,7 +143,7 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a \, toggle escaping mode
         if (character == '\\')
         {
-            //if (singleQuoting) continue;
+            if (singleQuoting) continue;
             escaping = !escaping;
             continue;
         }
