@@ -108,7 +108,12 @@ std::vector<std::string> populateArguments(std::string_view cmd)
             // If we're not single-quoting or double-quoting...
 
             // If we see a \, skip it
-            if(character == '\\') continue;
+            if (character == '\\')
+            {
+                if (i < cmd.size()) i += 2;
+
+                continue;
+            }
 
             // Add to the normal buffer, if all else fails
             normalBuffer.push_back(character);
