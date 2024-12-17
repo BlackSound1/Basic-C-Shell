@@ -91,14 +91,27 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see any other character
         else
         {
-            // If we're single-quoting, add to the quote buffer
-            if (singleQuoting) singleQuoteBuffer.push_back(character);
+            // If we're single-quoting, add to the single quote buffer
+            if (singleQuoting) 
+            {
+                singleQuoteBuffer.push_back(character);
+                continue;
+            }
             
-            // If we're double-quoting
-            else if (doubleQuoting) doubleQuoteBuffer.push_back(character);
+            // If we're double-quoting, add to the double quote buffer
+            if (doubleQuoting)
+            {
+                doubleQuoteBuffer.push_back(character);
+                continue;
+            }
 
-            // If we're not single-quoting or double-quoting, add to the normal buffer
-            else normalBuffer.push_back(character);
+            // If we're not single-quoting or double-quoting...
+
+            // If we see a \, skip it
+            if(character == '\\') continue;
+
+            // Add to the normal buffer, if all else fails
+            normalBuffer.push_back(character);
         }
     }
 
