@@ -1,6 +1,13 @@
 #pragma once
 
+#include <algorithm>
+#include <cstdlib>
+#include <filesystem>
+#include <iostream>
+#include <string>
 #include <vector>
+
+#include "helpers.h"
 
 const std::vector<std::string> builtins{ "exit", "echo", "type", "pwd", "cd" };
 
