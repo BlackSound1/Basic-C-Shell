@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <set>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -47,10 +48,10 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         }
 
         // If we run into a ' while double-quoting, treat it like a normal char and 
-		// add it to the normal buffer
+		// add it to the double-quote buffer
         else if (character == '\'' && doubleQuoting)
         {
-            normalBuffer.push_back(character);
+            doubleQuoteBuffer.push_back(character);
 			continue;
         }
 
