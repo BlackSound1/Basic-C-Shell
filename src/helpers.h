@@ -210,16 +210,16 @@ std::string getPath(const std::string& cmd) {
     // Read the PATH
     const auto PATH{ getenv("PATH") };
 
-    // If PATH not found, return empty PATH vector
+    // If PATH not found, return empty PATH
     if (!PATH) {
         return "";
     }
 
     // Get the PATH delimiter based on OS
-    const auto OS_PATH_DELIM{ getPATHDelim() };
+    const auto& OS_PATH_DELIM{ getPATHDelim() };
 
     // Get the PATH separator slash based on OS
-    const auto OS_PATH_SLASH{ getOSSlash() };
+    const auto& OS_PATH_SLASH{ getOSSlash() };
 
     // Create a string stream to read the PATH with
     std::stringstream ss(PATH);
@@ -241,7 +241,7 @@ std::string getPath(const std::string& cmd) {
 
         // Try the above, but for Windows...
 
-        absolutePath = path + OS_PATH_SLASH + cmd + ".exe";
+        absolutePath += ".exe";
 
         if (std::filesystem::exists(absolutePath)) {
             return absolutePath.string();

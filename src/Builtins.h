@@ -123,10 +123,10 @@ void handleCdCommand(std::vector<std::string> args) {
 void handleUnknownCommand(std::string_view cmdName, std::string_view input) {
 
 	// Try to get the absolute path of the command, and if we found nothing, loop
-	if (const auto& pathToCmd{ getPath(static_cast<std::string>(cmdName)) }; pathToCmd.empty()) {
-		std::cout << input << ": command not found" << std::endl;
+	if (getPath(std::string(cmdName)).empty()) {
+		std::cout << cmdName << ": command not found" << std::endl;
 		return;
 	}
 
-	invokeCommand(static_cast<std::string>(input));
+	invokeCommand(std::string(input));
 }
