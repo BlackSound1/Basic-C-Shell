@@ -15,6 +15,7 @@ struct Command
 	const std::vector<std::string> Arguments;
 };
 
+// Returns the command name and the index of the first space not in quotes
 std::pair<std::string, size_t> _handleQuotedCmdName(std::string_view input) {
 	bool inSingleQuote{ input[0] == '\'' };
 	bool inDoubleQuote{ input[0] == '"' };
@@ -65,9 +66,11 @@ std::pair<std::string, size_t> _handleQuotedCmdName(std::string_view input) {
 		// If we are not escaping and did not see a quote, add the character
 		cmdName += character;
 	}
+
+	return { "", -1 };
 }
 
-// Returns a pair of the command name and the index of the first, non-quoted space
+// Handles populating the command name
 std::pair<std::string, size_t> populateCommandName(std::string_view input) {
 
 	// If the first character is a quote
