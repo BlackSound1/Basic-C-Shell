@@ -1,34 +1,21 @@
-[![progress-banner](https://backend.codecrafters.io/progress/shell/da5a00ab-94ec-46ad-9a0f-a7dcc52dc258)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Basic C++ Shell
 
-This is a starting point for C++ solutions to the
-["Build Your Own Shell" Challenge](https://app.codecrafters.io/courses/shell/overview).
+This is a minimum viable product for a basic terminal shell. It is written in C++.
+Compiled with C++17 using MSVC.
 
-In this challenge, you'll build your own POSIX compliant shell that's capable of
-interpreting shell commands, running external programs and builtin commands like
-cd, pwd, echo and more. Along the way, you'll learn about shell command parsing,
-REPLs, builtin commands, and more.
+## Features
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+- **Builtin Commands**. This basic shell supports the following builtins:
+    - `exit`: Exit the shell with a specified status code. Ex: `exit 1`.
+    - `pwd`: Print the current working directory. Ex: `pwd`.
+	- `cd`: Change the current working directory. Ex: `cd ../`, `cd ~`, `cd /d/Documents`.
+    - `echo`: Print text to the terminal. Ex: `echo "Hello World"` Supports typical Unix behavior for single and double quotes.
+	- `type`: 
+        - If the argument is a builtin, displays that to the screen.
+		- If the argument is not a builtin, displays the path to the program, if it exists.
+		- If the argument is not a builtin or a program, displays an error message.
+- **Other commands**. If the command is not a builtin, it is assumed to be a program and is executed.
 
-# Passing the first stage
+## Usage
 
-The entry point for your `shell` implementation is in `src/main.cpp`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
-
-```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
-```
-
-Time to move on to the next stage!
-
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `cmake` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main.cpp`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+Compile (with at least C++17) and run the program. A shell will then be started. Type any of the above commands and any arguments you want.
