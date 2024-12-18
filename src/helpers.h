@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cctype>
 
 
 // Check if next character is a special character
@@ -29,8 +30,10 @@ std::vector<std::string> populateArguments(std::string_view cmd)
 
     for (size_t i{ 0 }; i < cmd.size(); i++) {
 
+        // Get the current character
         const auto& character{ cmd.at(i) };
 
+        // If we're escaping, push the char to the double-quote buffer
         if (escaping) {
             doubleQuoteBuffer.push_back(character);
             escaping = false;
@@ -40,14 +43,6 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we run into a ' while not double-quoting
         if (character == '\'' && !doubleQuoting)
         {
-            //// If we're currently escaping, treat this as a normal char
-            //if (escaping)
-            //{
-            //    singleQuoteBuffer.push_back(character);
-            //    escaping = false;
-            //    continue;
-            //}
-
             // Toggle single quoting mode
             singleQuoting = !singleQuoting;
 
@@ -70,8 +65,15 @@ std::vector<std::string> populateArguments(std::string_view cmd)
 			continue;
         }
 
-        // If we see a \ while double-quoting, escape if next char is in [\, $, ", \n]
-        if (character == '\\' && doubleQuoting && nextIsSpecialChar(cmd, i))
+        // Escaping is activated when not quoting or when double quoting,
+        // but only if followed by char in [\, $, ", \n]
+        if (
+            character == '\\' &&
+            (
+                (!singleQuoting && !doubleQuoting) ||
+                (doubleQuoting && nextIsSpecialChar(cmd, i))
+            )
+        )
         {
             escaping = true;
             continue;
@@ -80,6 +82,13 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a "...
         if (character == '"')
         {
+            // If we're double quoting, but the next char is a non-space, add to double quote buffer
+            if (doubleQuoting && (i + 1) < cmd.size() && !std::isspace(cmd.at(i + 1)))
+            {
+                doubleQuoteBuffer.push_back(character);
+                continue;
+            }
+
             // If we're currently single-quoting, treat this as a normal char
             if (singleQuoting)
             {
@@ -103,14 +112,6 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a space
         if (character == ' ')
         {
-            //// If we're currently escaping, treat this as a normal char
-            //if (escaping)
-            //{
-            //    normalBuffer.push_back(character);
-            //    escaping = false;
-            //    continue;
-            //}
-
             // If we're single quoting, add the space to the quote buffer
             if (singleQuoting) singleQuoteBuffer.push_back(character);
 
@@ -154,6 +155,9 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // Add to the normal buffer, if all else fails
         normalBuffer.push_back(character);
     }
+
+    if (!doubleQuoteBuffer.empty())
+        explodedString.push_back(doubleQuoteBuffer);
 
     // Prevent empty buffer from being written
     if (!normalBuffer.empty())
