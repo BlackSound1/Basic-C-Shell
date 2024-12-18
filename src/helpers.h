@@ -85,7 +85,7 @@ std::vector<std::string> populateArguments(std::string_view cmd)
             // If we're double quoting, but the next char is a non-space, add to double quote buffer
             if (doubleQuoting && (i + 1) < cmd.size() && !std::isspace(cmd.at(i + 1)))
             {
-                doubleQuoteBuffer.push_back(character);
+                //doubleQuoteBuffer.push_back(character);
                 continue;
             }
 
