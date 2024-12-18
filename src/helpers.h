@@ -1,11 +1,10 @@
 #pragma once
 
+#include <cctype>
 #include <filesystem>
 #include <set>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <cctype>
 
 
 // Check if next character is a special character
@@ -35,10 +34,14 @@ std::vector<std::string> populateArguments(std::string_view cmd)
 
         // If we're escaping, push the char to the double-quote buffer
         if (escaping) {
+            // If we're double-quoting, push the char to the double-quote buffer
             if (doubleQuoting)
                 doubleQuoteBuffer.push_back(character);
+
+            // If we're not quoting at all, push the char to the normal buffer
             if (!doubleQuoting && !singleQuoting)
                 normalBuffer.push_back(character);
+
             escaping = false;
             continue;
         }
@@ -85,12 +88,8 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         // If we see a "...
         if (character == '"')
         {
-            // If we're double quoting, but the next char is a non-space, add to double quote buffer
-            if (doubleQuoting && (i + 1) < cmd.size() && !std::isspace(cmd.at(i + 1)))
-            {
-                //doubleQuoteBuffer.push_back(character);
-                continue;
-            }
+            // If we're double quoting, but the next char is a non-space, skip this char
+            if (doubleQuoting && (i + 1) < cmd.size() && !std::isspace(cmd.at(i + 1))) continue;
 
             // If we're currently single-quoting, treat this as a normal char
             if (singleQuoting)
@@ -134,13 +133,6 @@ std::vector<std::string> populateArguments(std::string_view cmd)
 
         // If we see any other character...
 
-        //// If we see a \ while double-quoting, toggle escaping mode
-        //if (character == '\\' && doubleQuoting)
-        //{
-        //    escaping = true;
-        //    continue;
-        //}
-
         // If we're single-quoting, add to the single quote buffer
         if (singleQuoting)
         {
@@ -159,10 +151,11 @@ std::vector<std::string> populateArguments(std::string_view cmd)
         normalBuffer.push_back(character);
     }
 
+	// If the double buffer is not empty, push it
     if (!doubleQuoteBuffer.empty())
         explodedString.push_back(doubleQuoteBuffer);
 
-    // Prevent empty buffer from being written
+    // If the normal buffer is not empty, push it
     if (!normalBuffer.empty())
         explodedString.push_back(normalBuffer);
 
