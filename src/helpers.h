@@ -35,7 +35,10 @@ std::vector<std::string> populateArguments(std::string_view cmd)
 
         // If we're escaping, push the char to the double-quote buffer
         if (escaping) {
-            doubleQuoteBuffer.push_back(character);
+            if (doubleQuoting)
+                doubleQuoteBuffer.push_back(character);
+            if (!doubleQuoting && !singleQuoting)
+                normalBuffer.push_back(character);
             escaping = false;
             continue;
         }
